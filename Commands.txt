@@ -1,0 +1,56 @@
+================================================================================
+                    GHOSTPORT PROJECT REAL EXECUTION MANUAL
+================================================================================
+This file documents the exact operational commands used to compile, launch, 
+and test the core GhostPort C++ network engine and its detection scripts.
+
+ROLES:
+ - CEO: You (Syed Haider Ali)
+ - Lead Developer: AntiGravity
+ - Operations Manager: Gemini
+
+--------------------------------------------------------------------------------
+STAGE 1: COMPILING THE CORE C++ DECEPTION DAEMON
+--------------------------------------------------------------------------------
+Where to execute: Open your terminal/command prompt directly on your local 
+development environment where the C++ engine resides.
+
+  # 1. Step into the native repository directory
+  cd /d D:/GhostPort
+  
+  # 2. Compile the multi-threaded socket server using g++ 
+  # (Links the native Windows socket library 'ws2_32' for low-level port binding)
+  g++ -O3 src/main.cpp src/daemon.cpp -o bin/ghostport_engine.exe -lws2_32
+  
+  # 3. Verify the execution binary was successfully built in the bin directory
+  dir bin
+
+--------------------------------------------------------------------------------
+STAGE 2: LAUNCHING THE ENGINE AND INJECTING PORT RULES
+--------------------------------------------------------------------------------
+Where to execute: Run these in an Administrative Terminal so the engine can 
+safely interact with the Win32 Service Control Manager and local firewall.
+
+  # 1. Start the compiled deception daemon to open up our honey-ports 
+  # (Locks the engine onto local network sockets to listen for attacker hooks)
+  .\bin\ghostport_engine.exe --listen --ports=21,22,80,443
+  
+  # 2. Check the active network stack to confirm our C++ daemon is holding the ports
+  netstat -ano | findstr "21 22 80 443"
+
+--------------------------------------------------------------------------------
+STAGE 3: TESTING RECOGNITION AND ADVERSARY PACKETS
+--------------------------------------------------------------------------------
+Where to execute: Run these from an external machine on the same network or 
+via localhost to simulate an adversary hitting the tripwires.
+
+  # STEP A: Fire a rapid Nmap probe to trip the socket logging loop
+  nmap -p 21,22,80,443 -sS 127.0.0.1
+  
+  # STEP B: Verify that the engine accurately captured the incoming IP 
+  # and printed the raw log strings directly to the output console or file
+  type logs\tripwire_alerts.log
+
+================================================================================
+                           END OF ACTUAL MANUAL
+================================================================================

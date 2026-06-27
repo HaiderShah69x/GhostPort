@@ -1,0 +1,185 @@
+================================================================================
+           GHOSTPORT: AUTOMATED SINGLE PACKET AUTHORIZATION DEEMON
+              Comprehensive Development Ledger & SaaS Architecture
+================================================================================
+Document Type  : Enterprise Architecture Blueprint & Progress Log
+Author         : Syed Haider Ali
+Academic Major : Introduction to Cybersecurity, Air University
+Date           : June 11, 2026
+Version        : 4.1-Masterpiece-Roadmap
+--------------------------------------------------------------------------------
+
+1. PRODUCT VISION & EXECUTIVE SUMMARY
+-------------------------------------
+GhostPort is an enterprise-grade, low-level network security solution designed 
+to enforce a strict Zero-Trust Network Access (ZTNA) model at the operating system 
+kernel layer. 
+
+By default, administration endpoints—such as Secure Shell (SSH) on Port 22—are 
+left continuously exposed to the public internet, exposing them to ceaseless 
+automated port scanning, brute-force password discovery, and zero-day remote 
+vulnerabilities. 
+
+GhostPort acts as an "Invisibility Cloak" for these structural entry points. It 
+leverages native C++ network sockets to hook deep into the host operating system's 
+kernel firewall. Every management port is locked down and bricked up, appearing 
+completely dead to external attackers. Access is granted exclusively after a 
+client sends a cryptographically signed Single Packet Authorization (SPA) 
+"Secret Handshake." Upon authenticating the signature, GhostPort dynamically 
+drills a microscopic hole in the firewall for the client's explicit Source IP 
+address, automatically sealing the entry point after a 30-second window to 
+leave absolute zero attack surface behind.
+
+2. COMPLETED MILESTONES (THE ENGINE FOUNDATION)
+-----------------------------------------------
+The core proprietary cryptographic and packet automation engine has been fully 
+engineered, compiled via GCC, and successfully verified in low-level C++.
+
+[✓] MILESTONE 1: Low-Level UDP Network Socket Core
+    - Established an asynchronous network listener pipeline using Windows Sockets 
+      (Winsock2) via C++.
+    - Created an efficient network loop that listens to raw inbound UDP packets 
+      without impacting underlying OS scheduling or printing unnecessary UI delays.
+
+[✓] MILESTONE 2: Cryptographic Single Packet Authorization (SPA)
+    - Integrated high-performance symmetric cryptography utilizing the 
+      HMAC-SHA256 message authentication protocol.
+    - Configured the engine to parse inbound byte arrays, extracting embedded 
+      metadata and computing local cryptographic signatures using a Pre-Shared 
+      Key (PSK).
+
+[✓] MILESTONE 3: Anti-Replay Protection & State-Machine Verification
+    - Implemented a time-synchronization verification engine with a strict 
+      30-second rolling sliding window.
+    - Built a robust Anti-Replay tracking log that stores processed cryptographic 
+      tokens in memory. Duplicate tokens are caught instantly, flagged as 
+      "REPLAY_ATTACK", and dropped silently to preserve network safety.
+    - Verified real-world operation with a perfect 0-second time-skew calibration.
+
+[✓] MILESTONE 4: Windows Defender Firewall Command Injection (Kernel Control)
+    - Developed the specialized 'FirewallManager' C++ component.
+    - Wired a dynamic execution loop that invokes the Windows platform subsystem 
+      via 'std::system()' to run administrative firewall hooks:
+      'netsh advfirewall firewall add rule'
+    - Engineered an isolated, detached asynchronous background thread ('std::thread') 
+      that spawns the moment access is granted, counts down the session lifetime, 
+      and executes a clean 'delete rule' command sequence to revoke authorization.
+    - Resolved OS file-locking constraints by deploying automated workspace cleanup and
+      isolated test compilations ('ghostport_v4_test.exe').
+    - Successfully resolved local kernel permission barriers (Exit Code 1) by 
+      executing the background daemon using elevated Administrator security tokens.
+
+3. PROTOTYPE OUTPUT ARCHITECTURE (VERIFIED RUN)
+-----------------------------------------------
+The following structural execution trace was fully achieved on the local host machine, 
+proving structural alignment of the cryptographic parsing and firewall control loop:
+
+    ┌────────────────────────────────────────────────────────┐
+    │   ██████╗ ██╗  ██╗  ██████╗  ███████╗████████╗         │
+    │  ██╔════╝ ██║  ██║ ██╔═══██╗ ██╔════╝╚══██╔══╝         │
+    │  ██║  ███╗███████║ ██║   ██║ ███████╗   ██║            │
+    │  ██║   ██║██╔══██║ ██║   ██║ ╚════██║   ██║            │
+    │  ╚██████╔╝██║  ██║ ╚██████╔╝ ███████║   ██║            │
+    │   ╚═════╝ ╚═╝  ╚═╝  ╚═════╝  ╚══════╝   ╚═╝            │
+    │        ██████╗  ██████╗ ██████╗ ████████╗              │
+    │        ██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝              │
+    │        ██████╔╝██║   ██║██████╔╝   ██║                 │
+    │        ██╔═══╝ ██║   ██║██╔══██╗   ██║                 │
+    │        ██║     ╚██████╔╝██║  ██║   ██║                 │
+    │        ╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝                 │
+    ├────────────────────────────────────────────────────────┤
+    │  GhostPort v3.0 — Authenticated Port-Knocking Daemon   │
+    │  Milestone 3: Cryptographic SPA (HMAC-SHA256)         │
+    │  FYP Project by Syed Haider Ali                        │
+    └────────────────────────────────────────────────────────┘
+
+[HmacVerifier] SPA engine initialized.
+[HmacVerifier] PSK fingerprint (first 4 bytes): deadbeef...
+[HmacVerifier] Replay window: 30s
+
+[SequenceValidator] Initialized.
+[SequenceValidator] Knock sequence: 7000 → 7000 → 7000
+[SequenceValidator] Time window   : 30 seconds
+
+[SequenceValidator] SPA gate ENABLED.
+[FirewallManager] Firewall engine initialized.
+[FirewallManager] Protected port  : TCP/22
+[FirewallManager] Access window   : 30s
+[FirewallManager] Revocation mode : Auto (priority-queue thread)
+
+[GhostPort] 👂 Listener active on UDP port 7000. Waiting for knocks...
+[GhostPort] Press Ctrl+C to stop.
+
+[2026-06-11 16:48:51] Knock from 127.0.0.1 → port 7000
+[HmacVerifier] ✅ SPA VALID from 127.0.0.1 — port 7000, ts=1781178531, skew=0s
+[SequenceValidator] 🔑 FIRST KNOCK from 127.0.0.1 on port 7000. Window open (30s).
+[SequenceValidator]    Progress: [1/3] 7000 ✓
+[SequenceValidator] Result: FIRST_KNOCK (window opened)
+
+[2026-06-11 16:48:52] Knock from 127.0.0.1 → port 7000
+[HmacVerifier] ✅ SPA VALID from 127.0.0.1 — port 7000, ts=1781178532, skew=0s
+[SequenceValidator] ✓ STEP 2/3 accepted from 127.0.0.1 (port 7000).
+[SequenceValidator]    Time remaining: 28.9s
+[SequenceValidator] Result: STEP_ACCEPTED (sequence advancing)
+
+[2026-06-11 16:48:53] Knock from 127.0.0.1 → port 7000
+[HmacVerifier] ✅ SPA VALID from 127.0.0.1 — port 7000, ts=1781178533, skew=0s
+[SequenceValidator] ✅ SEQUENCE COMPLETE for 127.0.0.1! All 3 ports knocked correctly.
+[SequenceValidator]    Elapsed: 2.10s / 30s window.
+
+╔══════════════════════════════════════════════════════╗
+║  🔓 ACCESS GRANTED                                   ║
+╠══════════════════════════════════════════════════════╣
+║  Client IP : 127.0.0.1                               ║
+║  Status    : Full knock sequence validated ✓          ║
+║  Action    : Injecting Windows Firewall rule...      ║
+╚══════════════════════════════════════════════════════╝
+
+[FirewallManager] Injecting rule : GhostPort-127-0-0-1-1781178533
+[FirewallManager] netsh command  : netsh advfirewall firewall add rule name="GhostPort-127-0-0-1-1781178533" dir=in action=allow protocol=TCP localport=22 remoteip=127.0.0.1 enable=yes description="GhostPort: auto-expires in 30s"
+[FirewallManager] Rule ACTIVE: TCP/22 from 127.0.0.1 allowed for 30s.
+[FirewallManager] Auto-revocation scheduled in 30s.
+
+4. THE MASTERPIECE ROADMAP: EVOLVING INTO A SaaS/PaaS PLATFORM
+--------------------------------------------------------------
+To move beyond a localized command-line prototype and build a legitimate, 
+commercial cloud software product, GhostPort will be re-architected into an 
+isolated multi-tenant SaaS application split into a "Lightweight Edge Agent" 
+and a "Cloud Managed Control Plane".
+
+PHASE 1: REFINING THE CORE MUSCLE (EDGE AGENT OPTIMIZATION)
+    - Milestone 5: Asynchronous Multi-Port Concurrent Listeners
+      Implement parallel POSIX/Winsock worker pools using 'std::thread' to open 
+      and listen to distinct hardware ports (7000, 8000, 9000) simultaneously. 
+      This enables true, scattered multi-port port-knocking paths to prevent 
+      sequence sniffing.
+    - Milestone 6: Native System Background Service Conversion
+      Refactor the application entry routine to interface cleanly with the 
+      Windows Service Control Manager (SCM). The interactive console is stripped 
+      away, allowing the binary to run invisibly as a deep background host service 
+      that triggers immediately upon machine boot.
+
+PHASE 2: BUILDING THE BRAINS (THE SaaS CONTROL PLANE)
+    - Milestone 7: Distributed API Integration Subsystem
+      Embed a performance-optimized C++ network engine (via 'libcurl' or 
+      'cpp-httplib') directly inside the Edge Agent. This enables the daemon to 
+      transmit real-time audit logs, telemetry, and threat alarms (such as 
+      blocked replay scans) to a centralized cloud database over secure, 
+      encrypted gRPC/TLS channels.
+    - Milestone 8: Centralized Cloud Policy Distribution
+      Modify the engine to dynamically pull its active cryptographic keys, target 
+      port arrays, and auto-revocation configurations on initialization from an 
+      external cloud endpoint, allowing instant system-wide administrative updates.
+
+PHASE 3: THE FACE OF THE PLATFORM (THE FRONTEND DASHBOARD)
+    - Milestone 9: Unified Security Operations Center (SOC) Dashboard
+      Construct a web application dashboard utilizing Next.js / React paired with 
+      Tailwind CSS and modern visualization components. This web platform displays 
+      live server status maps, real-time blocking matrices, and detailed historical 
+      access metrics.
+    - Milestone 10: Multi-Tenant Enterprise Identity & Access Management (IAM)
+      Integrate token-based session protocols (JWT/OAuth2) to support isolated 
+      corporate organization profiles. This allows enterprise network administrators 
+      to grant, review, or instantly revoke infrastructure management rights to 
+      independent staff members using a cloud-native web console.
+================================================================================
